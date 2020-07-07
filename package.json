@@ -1,7 +1,7 @@
 {
-  "name": "wallpapers",
+  "name": "wallpaper-explorer",
   "version": "1.0.0",
-  "description": "",
+  "description": "Basically an overly simplified reddit browser to r/wallpaper that only displays the images to then scroll through them",
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
