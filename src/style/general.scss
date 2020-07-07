@@ -36,3 +36,39 @@ html,
   background-attachment: fixed;
   background-size: cover;
 }
+
+.center {
+  left: calc(50% - 5rem);
+  top: calc(50% - 6rem);
+  width: 10rem;
+  height: 12rem;
+  position: fixed;
+}
+
+.hidden {
+  background-color: transparent;
+}
+
+@keyframes show-hide {
+  0% {
+    opacity: 0%;
+  }
+  50% {
+    opacity: 70%;
+  }
+  100% {
+    opacity: 0%;
+  }
+}
+
+.pause-icon {
+  background-color: gray;
+  clip-path: polygon(0 0, 40% 0, 40% 100%, 0 100%, 0 0, 60% 0, 100% 0, 100% 100%, 60% 100%, 60% 0);
+  animation: show-hide 0.6s;
+}
+
+.play-icon {
+  background-color: gray;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  animation: show-hide 0.6s;
+}

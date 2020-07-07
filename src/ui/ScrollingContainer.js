@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ImageContainer from "./ImageContainer";
 
 const SPEED = 2;
+const PAUSE_ANIMTION = 0.5;
 
 const scrollDownByPosts = numPosts => {
   const desiredPosition = window.scrollY + window.innerHeight * numPosts; // Add page heights
@@ -16,8 +17,32 @@ const ScrollingContainer = ({ loadNext, loading, items = {} }) => {
   const [tick, setTick] = useState(0);
   const [loadingCooldown, setLoadingCooldown] = useState(false);
 
-  const [itemsAsArray, setItemsAsArray] = useState([]);
+  const [paused, setPaused] = useState(false);
+  const [pausedAnimating, setPausedAnimating] = useState(false);
+  const togglePause = useCallback(() => {
+    if (pausedAnimating) return; // Don't cancel animations
 
+    if (paused) {
+      setTick(SPEED);
+      setPaused(false);
+    } else {
+      setTick(0);
+      setPaused(true);
+    }
+    setPausedAnimating(true);
+    setTimeout(() => setPausedAnimating(false), PAUSE_ANIMTION * 1000);
+  }, [paused, pausedAnimating]);
+
+  useEffect(() => {
+    const handlePause = e => {
+      e.preventDefault();
+      togglePause();
+    };
+    window.addEventListener("keypress", handlePause);
+    return () => window.removeEventListener("keypress", handlePause);
+  }, [togglePause]);
+
+  const [itemsAsArray, setItemsAsArray] = useState([]);
   useEffect(() => {
     const entries = Object.entries(items);
     const arr = entries.map(([key, value]) => ({
@@ -36,11 +61,13 @@ const ScrollingContainer = ({ loadNext, loading, items = {} }) => {
   // Scroll after enough ticks
   useEffect(() => {
     const interval = setInterval(() => {
-      setTick(current => current + 1);
-      if (tick > 0 && tick % SPEED === 0) scrollDownByPosts(1);
+      if (!paused) {
+        setTick(current => current + 1);
+        if (tick > 0 && tick % SPEED === 0) scrollDownByPosts(1);
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [tick]);
+  }, [paused, tick]);
 
   useEffect(() => {
     if (loadingCooldown === true) {
@@ -66,11 +93,16 @@ const ScrollingContainer = ({ loadNext, loading, items = {} }) => {
     };
     window.addEventListener("scroll", checkReload);
     return () => window.removeEventListener("scroll", checkReload);
-  }, [loadNext, loading, loadingCooldown]);
+  }, [loadNext, paused, loading, loadingCooldown]);
 
   return (
     <div className="wallpaper-gallery">
       {loading && <span className="status">Loading...</span>}
+      <span
+        className={`center ${
+          pausedAnimating ? (paused ? "pause-icon" : "play-icon") : "hidden"
+        }`}
+      />
       {itemsAsArray.map(singlePost => (
         <ImageContainer key={singlePost[0]} post={singlePost} />
       ))}
